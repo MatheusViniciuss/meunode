@@ -1,6 +1,6 @@
 // modulos externos
 import inquirer from 'inquirer';
-import chalk from 'chalk';
+import chalk, { colorNames } from 'chalk';
 
 // modulos internos
 import fs from 'fs';
@@ -27,13 +27,13 @@ function operation(){
             createAccount();
         }
         else if(action === 'Consultar Saldo') {
-
+            getAccountBalance();
         }
         else if(action === 'Depositar'){
             deposit();
         }
         else if(action === 'Sacar'){
-
+            withdraw();
         }
         else if(action === 'Sair'){
             console.log(chalk.bgBlue.black('Obrigado por usar o Accounts!'))
@@ -110,6 +110,7 @@ function deposit(){
             },
         ])
         .then(answer => {
+
             const amount = answer['amount'] 
 
             // add on amount
@@ -122,14 +123,17 @@ function deposit(){
 }
 
 function checkAccount(accountName) {
+
     if(!fs.existsSync(`accounts/${accountName}.json`)){
         console.log(chalk.bgRed.black('Está conta não existe, escolha outro nome!'))
         return false;
     }
+
     return true;
 }
 
 function addAmount(accountName, amount){
+
     const accountData = getAccount(accountName)
 
     if(!amount){
@@ -140,7 +144,7 @@ function addAmount(accountName, amount){
     accountData.balance = parseFloat(amount) + parseFloat(accountData.balance)
 
     fs.writeFileSync(
-        `accounts/${accountData}.json`, 
+        `accounts/${accountName}.json`, 
         JSON.stringify(accountData),
         function(err){
             console.log(err)
@@ -154,10 +158,99 @@ function addAmount(accountName, amount){
 }
 
 function getAccount(accountName){
-    const accountJSON =fs.readFileSync(`accounts/${accountName}.json`, {
-        encoding: 'utf-8',
+
+    const accountJSON = fs.readFileSync(`accounts/${accountName}.json`, {
+        encoding: 'utf8',
         flag: 'r'
     })
 
     return JSON.parse(accountJSON)
+}
+
+//show account balance
+function getAccountBalance(){
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'Qual o nome da suta conta?'
+        }
+    ])
+    .then((answer) => {
+        const accountName = answer["accountName"]
+
+        // verify if account exists
+        if(!checkAccount(accountName)){
+            return getAccountBalance();
+        }
+
+        const accountData = getAccount(accountName);
+
+        console.log(
+            chalk.bgBlue.black(
+                `Olá, o saldo da sua conta é de R$${accountData.balance}`
+            ),
+        )
+        operation();
+    })
+    .catch(err => console.log(err))
+}
+
+// withdraw amount from user account
+function withdraw() {
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'Qual o nome da sua conta?'
+        }
+    ])
+    .then((answer) => {
+        const accountName = answer['accountName']
+
+        if(!checkAccount(accountName)){
+            return withdraw();
+        }
+        
+        inquirer.prompt([
+            {
+                name: 'amount',
+                message: 'Quanto você deseja sacar?'
+            }
+        ])
+        .then((answer) => {
+
+            const amount = answer['amount'];
+
+            removeAmount(accountName, amount);            
+        })
+        .catch(err => console.log(err))
+    })
+    .catch(err => console.log(err))
+}
+
+function removeAmount(accountName, amount){
+
+    const accountData = getAccount(accountName);
+
+    if(!amount) {
+
+        console.log(chalk.bgRed.black('Ocorreu um erro, tente novamenta mais tarde!'))
+        return withdraw()
+    }
+
+    if(accountData.balance < amount){
+        console.log(chalk.bgRed.black('Valor indisponivel!'));
+        return withdraw();
+    }
+
+    accountData.balance = parseFloat(accountData.balance) - parseFloat(amount);
+
+    fs.writeFileSync(`accounts/${accountName}.json`, 
+        JSON.stringify(accountData), 
+        function (err) {
+            console.log(err)
+        },
+    )
+
+    console.log(chalk.green(`Foi realizado um saque de R$${amount} da sua conta!`));
+    operation();
 }
