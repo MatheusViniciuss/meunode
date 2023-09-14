@@ -1,47 +1,36 @@
-const express = require('express')
+const exp = require('constants');
+const express = require('express');
 const app = express()
-const port = 3000
+const port = 3000 // variavel ambiente
 
-const path = require('path')
-
-const basePath = path.join(__dirname, 'templates')
+const path = require('path');
 
 const users = require('./users')
 
-// ler o body
+//ler o body
 app.use(
-  express.urlencoded({
-    extended: true,
-  }),
+    express.urlencoded({
+        extended:true,
+    })
 )
 
 app.use(express.json())
 
+//arquivos estáticos 
 app.use(express.static('public'))
 
-var checkAuth = function (req, res, next) {
-  req.authStatus = true
-
-  if (req.authStatus) {
-    console.log('Está logado, pode continuar')
-    next()
-  } else {
-    console.log('Não está logado, faça o login para continuar!')
-  }
-}
-
-app.use(checkAuth)
+const basePath = path.join(__dirname, 'templates')
 
 app.use('/users', users)
 
 app.get('/', (req, res) => {
-  res.sendFile(`${basePath}/index.html`)
+    res.sendFile(`${basePath}/index.html`)
 })
 
-app.use(function (req, res, next) {
-  res.status(404).sendFile(`${basePath}/404.html`)
+app.use(function(req, res, next) {
+    res.status(404).sendFile(`${basePath}/404.html`)
 })
 
 app.listen(port, () => {
-  console.log(`App rodando na porta:${port}`)
+    console.log(`App rodando na porta ${port}`)
 })

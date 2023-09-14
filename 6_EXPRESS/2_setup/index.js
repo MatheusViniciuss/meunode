@@ -1,11 +1,13 @@
-const express = require('express')
+const express = require('express');
+//import express from 'express';
+
 const app = express()
-const port = 3000
+const port = 3000 // variavel ambiente
 
 app.get('/', (req, res) => {
-  res.send('Olá Mundo!!')
+    res.send('Olá mundo!!')
 })
 
 app.listen(port, () => {
-  console.log(`App rodando na porta:${port}`)
+    console.log(`App rodando na porta ${port}`)
 })
