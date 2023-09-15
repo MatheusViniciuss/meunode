@@ -7,19 +7,19 @@ const path = require('path');
 
 const users = require('./users')
 
-//ler o body
-app.use(
-    express.urlencoded({
-        extended:true,
-    })
-)
+    //ler o body
+    app.use(
+        express.urlencoded({
+            extended:true,
+        })
+    )
 
-app.use(express.json())
+    app.use(express.json())
 
-//arquivos estáticos 
-app.use(express.static('public'))
+    //arquivos estáticos 
+    app.use(express.static('public'))
 
-const basePath = path.join(__dirname, 'templates')
+    const basePath = path.join(__dirname, 'templates')
 
 app.use('/users', users)
 
